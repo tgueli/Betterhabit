@@ -1,0 +1,1677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Good Habits - Comprehensive Habit & Finance Tracker</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Mascot Animations */
+    @keyframes floatMascot {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-6px) scale(1.05); }
+    }
+    
+    @keyframes pulseHeartbeat {
+      0%, 100% { transform: scale(1); }
+      14% { transform: scale(1.18); }
+      28% { transform: scale(1); }
+      42% { transform: scale(1.12); }
+      70% { transform: scale(1); }
+    }
+
+    .animate-float {
+      animation: floatMascot 3s ease-in-out infinite;
+    }
+
+    .animate-heartbeat {
+      animation: pulseHeartbeat 1.5s ease-in-out infinite;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+  <!-- Mascot Pop-Up Modal -->
+  <div id="mascot-popup" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-all">
+    <div class="bg-white border border-rose-100 rounded-3xl p-6 max-w-sm w-full shadow-2xl text-center transform transition-all scale-95" id="mascot-modal-card">
+      <div class="relative w-24 h-24 mx-auto mb-3 flex items-center justify-center">
+        <!-- SVG Animated Heart Mascot -->
+        <svg id="mascot-popup-svg" class="w-20 h-20 text-rose-500 animate-heartbeat filter drop-shadow-lg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+        <div class="absolute inset-0 flex items-center justify-center pt-1 text-white font-bold text-xs select-none pointer-events-none">
+          Pulse
+        </div>
+      </div>
+      <h3 class="text-xl font-extrabold text-slate-900" id="mascot-popup-title">Awesome Job!</h3>
+      <p class="text-sm text-slate-600 mt-2 font-medium" id="mascot-popup-msg">Pulse is super proud of your progress today!</p>
+      <button id="btn-close-mascot" class="mt-5 w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-bold py-2.5 rounded-xl shadow-md shadow-rose-200 transition">
+        Keep Going! ❤️
+      </button>
+    </div>
+  </div>
+
+  <!-- Header / Navigation Bar -->
+  <header class="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Logo, Mascot & Level Indicator -->
+      <div class="flex items-center gap-3 cursor-pointer" id="header-mascot-trigger" title="Click Pulse for a boost!">
+        <div class="relative w-11 h-11 bg-rose-50 border border-rose-200 rounded-2xl shadow-sm flex items-center justify-center overflow-hidden">
+          <svg class="w-8 h-8 text-rose-500 animate-float" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <h1 class="font-extrabold text-xl tracking-tight bg-gradient-to-r from-rose-500 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+              Good Habits
+            </h1>
+            <span class="text-[10px] bg-rose-100 text-rose-600 font-bold px-1.5 py-0.5 rounded-md">Pulse</span>
+          </div>
+          <div class="flex items-center gap-2 text-xs text-slate-500">
+            <span>Level <strong id="user-level" class="text-indigo-600">1</strong></span>
+            <span>•</span>
+            <span id="user-xp" class="text-emerald-600 font-bold">0 / 100 XP</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex items-center gap-1 overflow-x-auto py-1 max-w-full text-sm font-semibold text-slate-600" id="nav-tabs">
+        <button id="btn-dashboard" class="nav-btn active flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-50 text-indigo-600 font-bold transition">
+          <i class="fa-solid fa-house"></i> Overview
+        </button>
+        <button id="btn-todo" class="nav-btn flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition">
+          <i class="fa-solid fa-list-check"></i> To-Do
+        </button>
+        <button id="btn-wellness" class="nav-btn flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition">
+          <i class="fa-solid fa-heart-pulse text-rose-500"></i> Wellness
+        </button>
+        <button id="btn-finance" class="nav-btn flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition">
+          <i class="fa-solid fa-wallet"></i> Finance
+        </button>
+        <button id="btn-food" class="nav-btn flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition">
+          <i class="fa-solid fa-utensils"></i> Nutrition & Macros
+        </button>
+        <button id="btn-exercise" class="nav-btn flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition">
+          <i class="fa-solid fa-dumbbell"></i> Exercise
+        </button>
+        <button id="btn-screentime" class="nav-btn flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition">
+          <i class="fa-solid fa-mobile-screen"></i> Screen Time
+        </button>
+        <button id="btn-travel" class="nav-btn flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition">
+          <i class="fa-solid fa-plane"></i> Travel Goals
+        </button>
+      </nav>
+
+      <!-- Custom Actions -->
+      <div class="flex items-center gap-2">
+        <button id="btn-open-modal" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold px-3 py-2 rounded-xl border border-indigo-200 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-plus"></i> Add Custom Tab
+        </button>
+        <button id="btn-export" title="Backup Data" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 p-2 rounded-xl border border-slate-200 transition">
+          <i class="fa-solid fa-download"></i>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- XP Progress Bar Banner -->
+  <div class="w-full bg-slate-200/60 border-b border-slate-200 px-4 py-1.5">
+    <div class="max-w-7xl mx-auto flex items-center gap-3">
+      <div class="w-full bg-slate-300/70 h-2.5 rounded-full overflow-hidden border border-slate-300">
+        <div id="xp-bar" class="bg-gradient-to-r from-rose-500 via-purple-500 to-indigo-500 h-full w-0 transition-all duration-500"></div>
+      </div>
+      <span class="text-[10px] uppercase font-bold tracking-wider text-slate-500 whitespace-nowrap" id="xp-percentage">0% to Lvl UP</span>
+    </div>
+  </div>
+
+  <!-- Main Content Container -->
+  <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
+
+    <!-- 1. OVERVIEW DASHBOARD TAB -->
+    <section id="dashboard" class="tab-content active space-y-6">
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div class="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Daily Streak</p>
+            <h3 class="text-2xl font-extrabold text-amber-500 flex items-center gap-1.5 mt-1">
+              <i class="fa-solid fa-fire text-amber-500"></i> <span id="dash-streak">1</span> Days
+            </h3>
+          </div>
+          <div class="p-3 bg-amber-50 rounded-2xl text-amber-500 border border-amber-100">
+            <i class="fa-solid fa-award text-xl"></i>
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Current Weight</p>
+            <h3 class="text-2xl font-extrabold text-rose-500 mt-1" id="dash-weight">-- lbs</h3>
+          </div>
+          <div class="p-3 bg-rose-50 rounded-2xl text-rose-500 border border-rose-100">
+            <i class="fa-solid fa-weight-scale text-xl"></i>
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Net Worth</p>
+            <h3 class="text-2xl font-extrabold text-emerald-600 mt-1" id="dash-networth">$0.00</h3>
+          </div>
+          <div class="p-3 bg-emerald-50 rounded-2xl text-emerald-600 border border-emerald-100">
+            <i class="fa-solid fa-chart-line text-xl"></i>
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Today's Calories</p>
+            <h3 class="text-2xl font-extrabold text-indigo-600 mt-1" id="dash-cals">0 / 2,000 kcal</h3>
+          </div>
+          <div class="p-3 bg-indigo-50 rounded-2xl text-indigo-600 border border-indigo-100">
+            <i class="fa-solid fa-bolt text-xl"></i>
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Workout Today</p>
+            <h3 class="text-2xl font-extrabold text-sky-600 mt-1" id="dash-workout">0 mins</h3>
+          </div>
+          <div class="p-3 bg-sky-50 rounded-2xl text-sky-600 border border-sky-100">
+            <i class="fa-solid fa-person-running text-xl"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Long Term Goals Section -->
+      <div class="bg-white border border-slate-200/80 p-6 rounded-2xl shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-bullseye text-rose-500"></i> Long-Term Goals
+            </h2>
+            <p class="text-xs text-slate-500 font-medium">Create major goals that automatically appear in their category tab! Worth <strong class="text-amber-500">+1,000 XP</strong> each.</p>
+          </div>
+          <span class="text-xs font-bold bg-amber-50 text-amber-600 border border-amber-200 px-3 py-1 rounded-full">+1,000 XP Target</span>
+        </div>
+
+        <form id="form-lt-goal" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+          <input type="text" id="lt-goal-text" placeholder="e.g. Lose 20 lbs, Buy a House, Visit Japan" required class="sm:col-span-1 bg-slate-50 border border-slate-200 px-4 py-2.5 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-rose-500">
+          <select id="lt-goal-category" class="bg-slate-50 border border-slate-200 px-3 py-2.5 rounded-xl text-slate-800 focus:outline-none focus:border-rose-500">
+            <option value="exercise">Exercise</option>
+            <option value="food">Nutrition & Macros</option>
+            <option value="wellness">Wellness</option>
+            <option value="finance">Finance</option>
+            <option value="screentime">Screen Time</option>
+            <option value="travel">Travel Goals</option>
+            <option value="todo">To-Do</option>
+          </select>
+          <button type="submit" class="bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 font-bold px-5 py-2.5 rounded-xl text-white transition shadow-sm flex items-center justify-center gap-2">
+            <i class="fa-solid fa-trophy"></i> Create Goal
+          </button>
+        </form>
+
+        <ul id="dash-lt-goals-list" class="space-y-2"></ul>
+      </div>
+
+      <!-- Quick Action XP Rewards Grid -->
+      <div class="bg-white border border-slate-200/80 p-6 rounded-2xl shadow-sm">
+        <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-star text-amber-400"></i> Daily XP Earners
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+          <button id="quick-todo" class="p-4 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-200 text-left transition flex items-center justify-between group">
+            <div>
+              <p class="font-bold text-slate-800 group-hover:text-indigo-600 transition">Complete a To-Do</p>
+              <p class="text-xs text-emerald-600 mt-0.5 font-bold">+10 to +20 XP</p>
+            </div>
+            <i class="fa-solid fa-check-double text-slate-400 group-hover:text-indigo-600 transition"></i>
+          </button>
+
+          <button id="quick-cal-xp" class="p-4 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-200 text-left transition flex items-center justify-between group">
+            <div>
+              <p class="font-bold text-slate-800 group-hover:text-emerald-600 transition">Stay Under Calorie Target</p>
+              <p class="text-xs text-emerald-600 mt-0.5 font-bold">+25 XP</p>
+            </div>
+            <i class="fa-solid fa-leaf text-slate-400 group-hover:text-emerald-600 transition"></i>
+          </button>
+
+          <button id="quick-exercise" class="p-4 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-200 text-left transition flex items-center justify-between group">
+            <div>
+              <p class="font-bold text-slate-800 group-hover:text-sky-600 transition">Log a Workout</p>
+              <p class="text-xs text-emerald-600 mt-0.5 font-bold">+25 XP</p>
+            </div>
+            <i class="fa-solid fa-dumbbell text-slate-400 group-hover:text-sky-600 transition"></i>
+          </button>
+
+          <button id="quick-finance" class="p-4 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-200 text-left transition flex items-center justify-between group">
+            <div>
+              <p class="font-bold text-slate-800 group-hover:text-purple-600 transition">Invest Money</p>
+              <p class="text-xs text-amber-500 mt-0.5 font-bold">+50 XP Bonus</p>
+            </div>
+            <i class="fa-solid fa-piggy-bank text-slate-400 group-hover:text-purple-600 transition"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. TO-DO TAB -->
+    <section id="todo" class="tab-content space-y-6">
+      <div id="todo-lt-container" class="hidden"></div>
+
+      <div class="bg-white border border-slate-200/80 p-6 rounded-2xl shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-list-check text-indigo-600"></i> To-Do List
+            </h2>
+            <p class="text-xs text-slate-500 font-medium">Complete tasks to earn category XP bonuses!</p>
+          </div>
+          <span class="text-xs font-bold bg-indigo-50 text-indigo-600 border border-indigo-200 px-3 py-1 rounded-full" id="todo-count">0 Completed</span>
+        </div>
+
+        <form id="form-todo" class="space-y-3 mb-6">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <input type="text" id="todo-input" placeholder="What do you need to accomplish?" required class="sm:col-span-2 bg-slate-50 border border-slate-200 px-4 py-2.5 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500">
+            <select id="todo-category" class="bg-slate-50 border border-slate-200 px-3 py-2.5 rounded-xl text-slate-800 focus:outline-none focus:border-indigo-500 font-medium">
+              <option value="Cleaning|10">Cleaning (+10 XP)</option>
+              <option value="Career|10">Career (+10 XP)</option>
+              <option value="Altruism|20">Altruism (+20 XP)</option>
+              <option value="Health|20">Health (+20 XP)</option>
+              <option value="Family|20">Family (+20 XP)</option>
+            </select>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <div class="flex items-center gap-2">
+              <input type="checkbox" id="todo-is-recurring" class="w-4 h-4 accent-indigo-600 rounded cursor-pointer">
+              <label for="todo-is-recurring" class="text-xs font-bold text-slate-700 cursor-pointer flex items-center gap-1">
+                <i class="fa-solid fa-rotate text-indigo-600"></i> Make Recurring Task
+              </label>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-medium text-slate-500">Frequency:</span>
+              <select id="todo-recurrence" class="bg-white border border-slate-200 px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-700 focus:outline-none focus:border-indigo-500">
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="biweekly">Bi-weekly</option>
+                <option value="monthly">Monthly</option>
+              </select>
+            </div>
+
+            <button type="submit" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 font-bold px-5 py-2 rounded-xl text-white text-xs transition flex items-center justify-center gap-2 shadow-sm">
+              <i class="fa-solid fa-plus"></i> Add Task
+            </button>
+          </div>
+        </form>
+
+        <ul id="todo-list" class="space-y-2"></ul>
+      </div>
+    </section>
+
+    <!-- 3. WELLNESS TAB (Water & Sleep) -->
+    <section id="wellness" class="tab-content space-y-6">
+      <div id="wellness-lt-container" class="hidden"></div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Water Tracker Card -->
+        <div class="bg-white border border-slate-200/80 p-6 rounded-2xl shadow-sm">
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-droplet text-sky-500"></i> Water & Hydration
+              </h2>
+              <p class="text-xs text-slate-500">Track hydration and earn <strong class="text-sky-500">+15 XP</strong> when reaching your daily goal!</p>
+            </div>
+            <button id="btn-edit-water-goal" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-xl border border-slate-200"><i class="fa-solid fa-pen"></i> Edit Goal</button>
+          </div>
+
+          <!-- Bottle Progress Container -->
+          <div class="p-5 bg-sky-50/60 rounded-2xl border border-sky-100 mb-6 flex items-center gap-6">
+            <div class="relative w-16 h-32 bg-slate-200 border-2 border-sky-300 rounded-3xl overflow-hidden flex flex-col justify-end">
+              <div id="water-fill" class="bg-gradient-to-t from-sky-500 to-sky-400 w-full h-0 transition-all duration-500"></div>
+              <div class="absolute inset-0 flex items-center justify-center font-extrabold text-xs text-slate-700 select-none">
+                <span id="water-fill-pct">0%</span>
+              </div>
+            </div>
+
+            <div class="flex-1">
+              <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Today's Progress</p>
+              <h3 class="text-3xl font-extrabold text-sky-600 mt-1" id="water-count-label">0 / 64 oz</h3>
+              <p class="text-xs text-slate-400 mt-2 font-medium" id="water-status-msg">Drink up to feel energized!</p>
+            </div>
+          </div>
+
+          <!-- Add Water Action Buttons -->
+          <div class="grid grid-cols-3 gap-3">
+            <button onclick="addWater(8)" class="py-2.5 bg-sky-50 hover:bg-sky-100 text-sky-700 font-bold rounded-xl border border-sky-200 transition text-sm flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-plus text-xs"></i> 8 oz
+            </button>
+            <button onclick="addWater(16)" class="py-2.5 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-xl transition text-sm flex items-center justify-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-plus text-xs"></i> 16 oz
+            </button>
+            <button onclick="addCustomWater()" class="py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl border border-slate-200 transition text-sm">
+              Custom
+            </button>
+          </div>
+        </div>
+
+        <!-- Sleep Tracker Card -->
+        <div class="bg-white border border-slate-200/80 p-6 rounded-2xl shadow-sm">
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-moon text-indigo-500"></i> Sleep Tracker
+              </h2>
+              <p class="text-xs text-slate-500">Log sleep & hit target hours for <strong class="text-indigo-600">+25 XP</strong>, plus <strong class="text-purple-600">+20 XP Precision Bonus</strong> for hitting schedule!</p>
+            </div>
+            <button id="btn-edit-sleep-goals" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-xl border border-slate-200"><i class="fa-solid fa-pen"></i> Set Sleep Goals</button>
+          </div>
+
+          <!-- Sleep Target Banner -->
+          <div class="p-4 bg-indigo-50/60 rounded-2xl border border-indigo-100 mb-6 flex flex-wrap justify-between items-center gap-2 text-xs font-semibold text-slate-700">
+            <div><i class="fa-solid fa-bed text-indigo-500"></i> Bedtime: <strong id="goal-bedtime-lbl" class="text-indigo-600">10:30 PM</strong></div>
+            <div><i class="fa-solid fa-sun text-amber-500"></i> Wake: <strong id="goal-waketime-lbl" class="text-indigo-600">6:30 AM</strong></div>
+            <div><i class="fa-solid fa-clock text-indigo-500"></i> Target: <strong id="goal-sleep-hrs-lbl" class="text-indigo-600">8.0 hrs</strong></div>
+          </div>
+
+          <!-- Sleep Logger Form -->
+          <form id="form-sleep" class="space-y-3 mb-6">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1">Fell Asleep At</label>
+                <input type="time" id="sleep-bedtime" required class="w-full bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-indigo-500">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1">Woke Up At</label>
+                <input type="time" id="sleep-waketime" required class="w-full bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-indigo-500">
+              </div>
+            </div>
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 font-bold py-2.5 rounded-xl text-white text-sm transition shadow-sm">
+              Log Night's Sleep
+            </button>
+          </form>
+
+          <!-- Sleep Logs History -->
+          <ul id="sleep-history-list" class="space-y-2"></ul>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 4. PERSONAL FINANCE TAB -->
+    <section id="finance" class="tab-content space-y-6">
+      <div id="finance-lt-container" class="hidden"></div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm">
+          <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Total Net Worth</p>
+          <h3 class="text-3xl font-extrabold text-emerald-600 mt-1" id="fin-net-worth">$0.00</h3>
+          <p class="text-[11px] text-slate-400 mt-2">Combined balance across all accounts</p>
+        </div>
+
+        <div class="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm">
+          <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Paycheck Total (Per 2 Wks)</p>
+          <div class="flex items-center justify-between mt-1">
+            <h3 class="text-2xl font-extrabold text-indigo-600" id="fin-paycheck-amount">$2,300.45</h3>
+            <button id="btn-edit-paycheck" class="text-xs text-slate-400 hover:text-indigo-600 font-bold"><i class="fa-solid fa-pen"></i> Edit</button>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-2">Base used for percentage routing</p>
+        </div>
+
+        <div class="bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 p-5 rounded-2xl shadow-sm">
+          <p class="text-xs text-purple-600 font-bold uppercase tracking-wider">Investment Boost</p>
+          <h3 class="text-2xl font-extrabold text-amber-500 mt-1">+50 XP</h3>
+          <p class="text-[11px] text-slate-500 mt-2">Awarded for adding to Retirement or Savings!</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white border border-slate-200/80 p-6 rounded-2xl shadow-sm">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-building-columns text-sky-500"></i> Account Balances
+            </h3>
+            <button id="btn-edit-accounts" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-xl border border-slate-200"><i class="fa-solid fa-pen"></i> Edit Balances</button>
+          </div>
+          <div class="space-y-3" id="account-balances-list"></div>
+        </div>
+
+        <div class="bg-white border border-slate-200/80 p-6 rounded-2xl shadow-sm">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-pie-chart text-indigo-600"></i> Budget Buckets
+            </h3>
+            <button id="btn-add-category" class="text-xs bg-slate-100 hover:bg-slate-200 text-indigo-600 font-bold px-3 py-1.5 rounded-xl border border-slate-200"><i class="fa-solid fa-plus"></i> Add Category</button>
+          </div>
+          <div class="space-y-3" id="budget-buckets-list"></div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white border border-slate-200/80 p-6 rounded-2xl shadow-sm">
+          <h3 class="text-lg font-bold mb-4 flex items-center gap-2 text-emerald-600">
+            <i class="fa-solid fa-piggy-bank"></i> Log Income / Investment (+XP)
+          </h3>
+          <form id="form-income" class="space-y-3">
+            <input type="text" id="inc-desc" placeholder="Description (e.g. Paycheck, IRA deposit)" required class="w-full bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-500">
+            <div class="flex gap-2">
+              <input type="number" step="0.01" id="inc-amount" placeholder="Amount ($)" required class="w-1/2 bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-500">
+              <select id="inc-category" class="w-1/2 bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl text-slate-800 focus:outline-none focus:border-emerald-500">
+                <option value="Retirement">Retirement (+50 XP)</option>
+                <option value="Savings">Savings (+50 XP)</option>
+                <option value="Chase">Checking / Other</option>
+              </select>
+            </div>
+            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 font-bold px-4 py-2.5 rounded-xl text-white transition shadow-sm">
+              Log Income / Investment
+            </button>
+          </form>
+        </div>
+
+        <div class="bg-white border border-slate-200/80 p-6 rounded-2xl shadow-sm">
+          <h3 class="text-lg font-bold mb-4 flex items-center gap-2 text-rose-500">
+            <i class="fa-solid fa-receipt"></i> Log Expense
+          </h3>
+          <form id="form-expense" class="space-y-3">
+            <input type="text" id="exp-desc" placeholder="Expense description (e.g., Groceries, Gas)" required class="w-full bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-rose-500">
+            <div class="flex gap-2">
+              <input type="number" step="0.01" id="exp-amount" placeholder="Amount ($)" required class="w-1/2 bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-rose-500">
+              <select id="exp-bucket" class="w-1/2 bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl text-slate-800 focus:outline-none focus:border-rose-500"></select>
+            </div>
+            <button type="submit" class="w-full bg-rose-500 hover:bg-rose-600 font-bold px-4 py-2.5 rounded-xl text-white transition shadow-sm">
+              Subtract Expense
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. NUTRITION & MACROS TAB -->
+    <section id="food" class="tab-content space-y-6">
+      <div id="food-lt-container" class="hidden"></div>
+
+      <!-- 2-Week Calorie & Weight Fluctuations Chart.js Canvas -->
+      <div class="bg-white border border-slate-200/80 p-6 rounded-2xl shadow-sm">
+        <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-chart-area text-indigo-600"></i> 14-Day Calorie & Weight Trend
+            </h2>
+            <p class="text-xs text-slate-500">Track calorie intake alongside body weight fluctuations over time.</p>
+          </div>
+
+          <!-- Weight Goal Status & Entry -->
+          <div class="flex items-center gap-2">
+            <form id="form-log-weight" class="flex items-center gap-2">
+              <input type="number" step="0.1" id="weight-input" placeholder="Weight (lbs)" required class="w-28 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:border-indigo-500">
+              <select id="weight-goal-type" class="bg-slate-50 border border-slate-200 px-2.5 py-1.5 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-indigo-500">
+                <option value="loss">Goal: Weight Loss</option>
+                <option value="gain">Goal: Weight Gain</option>
+              </select>
+              <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 font-bold px-3 py-1.5 rounded-xl text-white text-xs transition shadow-sm">
+                Log Weight (+20 XP)
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <div class="relative w-full h-64">
+          <canvas id="weightCalorieChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Macro Goals Setup Banner -->
+      <div class="bg-white border border-slate-200/80 p-6 rounded-2xl shadow-sm">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+            <i class="fa-solid fa-bullseye text-emerald-600"></i> Daily Target Goals
+          </h2>
+          <button id="btn-edit-macro-goals" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-xl border border-slate-200"><i class="fa-solid fa-pen"></i> Edit Goals</button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-500 font-bold">Calories</span>
+              <span id="cal-count-label" class="text-indigo-600 font-bold">0 / 2,000 kcal</span>
+            </div>
+            <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden mt-2">
+              <div id="bar-cal" class="bg-indigo-500 h-full w-0 transition-all"></div>
+            </div>
+          </div>
+
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-500 font-bold">Protein</span>
+              <span id="p-count-label" class="text-rose-500 font-bold">0 / 150g</span>
+            </div>
+            <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden mt-2">
+              <div id="bar-p" class="bg-rose-500 h-full w-0 transition-all"></div>
+            </div>
+          </div>
+
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-500 font-bold">Carbs</span>
+              <span id="c-count-label" class="text-amber-500 font-bold">0 / 200g</span>
+            </div>
+            <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden mt-2">
+              <div id="bar-c" class="bg-amber-500 h-full w-0 transition-all"></div>
+            </div>
+          </div>
+
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-500 font-bold">Fats</span>
+              <span id="f-count-label" class="text-sky-600 font-bold">0 / 65g</span>
+            </div>
+            <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden mt-2">
+              <div id="bar-f" class="bg-sky-500 h-full w-0 transition-all"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white border border-slate-200/80 p-6 rounded-2xl shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+            <i class="fa-solid fa-utensils text-emerald-600"></i> Log Meal & Macros
+          </h2>
+          <button id="btn-claim-cal-xp" class="text-xs bg-emerald-50 text-emerald-600 font-bold px-3 py-1.5 rounded-xl border border-emerald-200 hover:bg-emerald-100 transition">
+            Claim Goal XP (+25 XP)
+          </button>
+        </div>
+
+        <form id="form-food" class="grid grid-cols-1 sm:grid-cols-5 gap-3 mb-6">
+          <input type="text" id="food-name" placeholder="Meal Name" required class="sm:col-span-1 bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-500">
+          <input type="number" id="food-cals" placeholder="Calories" required class="bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-500">
+          <input type="number" id="food-protein" placeholder="Protein (g)" value="0" class="bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-500">
+          <input type="number" id="food-carbs" placeholder="Carbs (g)" value="0" class="bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-500">
+          <input type="number" id="food-fat" placeholder="Fat (g)" value="0" class="bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-500">
+          <button type="submit" class="sm:col-span-5 bg-emerald-600 hover:bg-emerald-700 font-bold px-4 py-2.5 rounded-xl text-white transition shadow-sm">
+            Log Meal & Macros
+          </button>
+        </form>
+
+        <ul id="food-list" class="space-y-2"></ul>
+      </div>
+    </section>
+
+    <!-- 6. EXERCISE TAB -->
+    <section id="exercise" class="tab-content space-y-6">
+      <div id="exercise-lt-container" class="hidden"></div>
+
+      <div class="bg-white border border-slate-200/80 p-6 rounded-2xl shadow-sm">
+        <h2 class="text-xl font-bold text-slate-900 mb-2 flex items-center gap-2">
+          <i class="fa-solid fa-dumbbell text-sky-600"></i> Exercise Log
+        </h2>
+        <p class="text-xs text-slate-500 font-medium mb-4">Log workouts to earn <strong class="text-sky-600">+25 XP</strong>!</p>
+
+        <form id="form-exercise" class="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-6">
+          <input type="text" id="ex-name" placeholder="Workout Name" required class="bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-sky-500">
+          <input type="number" id="ex-mins" placeholder="Duration (mins)" required class="bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-sky-500">
+          <input type="number" id="ex-cals" placeholder="Est. Calories Burned" required class="bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-sky-500">
+          <button type="submit" class="bg-sky-600 hover:bg-sky-700 font-bold px-4 py-2 rounded-xl text-white transition shadow-sm">
+            Log Workout
+          </button>
+        </form>
+
+        <ul id="workout-list" class="space-y-2"></ul>
+      </div>
+    </section>
+
+    <!-- 7. SCREEN TIME TAB (Next-Day Reflection Mode) -->
+    <section id="screentime" class="tab-content space-y-6">
+      <div id="screentime-lt-container" class="hidden"></div>
+
+      <div class="bg-white border border-slate-200/80 p-6 rounded-2xl shadow-sm">
+        <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-mobile-screen text-amber-500"></i> Screen Time Next-Day Reflection
+            </h2>
+            <p class="text-xs text-slate-500 font-medium">Reflect each morning on yesterday's mobile screen time. Earn <strong class="text-amber-500">+10 XP</strong> for logging + <strong class="text-emerald-600">+20 XP Bonus</strong> for staying under target!</p>
+          </div>
+          <button id="btn-edit-st-limit" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-xl border border-slate-200"><i class="fa-solid fa-pen"></i> Daily Limit: <span id="st-limit-lbl">3h 0m</span></button>
+        </div>
+
+        <!-- Yesterday Reflection Prompt Card -->
+        <div class="p-5 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl mb-6">
+          <h3 class="text-sm font-extrabold text-amber-800 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-sun text-amber-500"></i> Morning Reflection for Yesterday
+          </h3>
+          
+          <form id="form-screentime" class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Hours</label>
+              <input type="number" id="st-hours" placeholder="Hours" required class="w-full bg-white border border-amber-200 px-3.5 py-2 rounded-xl text-slate-800 focus:outline-none focus:border-amber-500 text-sm">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Minutes</label>
+              <input type="number" id="st-mins" placeholder="Minutes" required class="w-full bg-white border border-amber-200 px-3.5 py-2 rounded-xl text-slate-800 focus:outline-none focus:border-amber-500 text-sm">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Top App Category</label>
+              <select id="st-category" class="w-full bg-white border border-amber-200 px-3 py-2 rounded-xl text-slate-800 focus:outline-none focus:border-amber-500 text-sm font-semibold">
+                <option value="Social Media">Social Media</option>
+                <option value="Entertainment">Entertainment</option>
+                <option value="Work & Productivity">Work & Productivity</option>
+                <option value="Gaming">Gaming</option>
+                <option value="Messaging / Calls">Messaging / Calls</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="flex items-end">
+              <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 font-bold py-2 rounded-xl text-white text-sm transition shadow-sm">
+                Log Reflection
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <h3 class="text-sm font-bold text-slate-800 mb-3">Reflection History & Categories</h3>
+        <div id="st-history" class="space-y-2"></div>
+      </div>
+    </section>
+
+    <!-- 8. TRAVEL GOALS TAB -->
+    <section id="travel" class="tab-content space-y-6">
+      <div id="travel-lt-container" class="hidden"></div>
+
+      <div class="bg-white border border-slate-200/80 p-6 rounded-2xl shadow-sm">
+        <h2 class="text-xl font-bold text-slate-900 mb-2 flex items-center gap-2">
+          <i class="fa-solid fa-plane text-pink-500"></i> Travel Bucket List
+        </h2>
+        <p class="text-xs text-slate-500 font-medium mb-6">Check off travel destinations to earn <strong class="text-pink-500">+30 XP</strong>!</p>
+
+        <form id="form-travel" class="flex gap-2 mb-6">
+          <input type="text" id="travel-input" placeholder="Destination (e.g., Tokyo, Acadia National Park)" required class="flex-1 bg-slate-50 border border-slate-200 px-4 py-2.5 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-pink-500">
+          <button type="submit" class="bg-pink-500 hover:bg-pink-600 font-bold px-5 py-2.5 rounded-xl text-white transition flex items-center gap-2 shadow-sm">
+            <i class="fa-solid fa-plus"></i> Add Goal
+          </button>
+        </form>
+
+        <ul id="travel-list" class="space-y-2"></ul>
+      </div>
+    </section>
+
+    <!-- DYNAMIC CUSTOM SECTIONS CONTAINER -->
+    <div id="custom-sections-container"></div>
+
+  </main>
+
+  <!-- CUSTOM SECTION CREATOR MODAL -->
+  <div id="custom-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 rounded-3xl p-6 max-w-md w-full shadow-2xl">
+      <h3 class="text-lg font-bold text-slate-900 mb-1">Create Custom Section</h3>
+      <p class="text-xs text-slate-500 mb-4">Add a customized habit tab (e.g. Reading, Guitar, Language).</p>
+
+      <form id="form-custom-sec" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Section Title</label>
+          <input type="text" id="modal-sec-title" placeholder="e.g., Guitar Practice" required class="w-full bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-slate-800 focus:outline-none focus:border-indigo-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Icon Class (Font Awesome)</label>
+          <input type="text" id="modal-sec-icon" value="fa-star" placeholder="e.g., fa-guitar, fa-book" required class="w-full bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-slate-800 focus:outline-none focus:border-indigo-500">
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" id="btn-close-modal" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-bold">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold">Create Tab</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- APPLICATION LOGIC SCRIPT -->
+  <script>
+    let state = {
+      xp: 0,
+      level: 1,
+      streak: 1,
+      paycheck: 2300.45,
+      macroGoals: { cals: 2000, p: 150, c: 200, f: 65 },
+      waterGoal: 64,
+      todayWater: 0,
+      sleepGoals: { bedtime: '22:30', waketime: '06:30', duration: 8.0 },
+      sleepLogs: [],
+      weightLogs: [],
+      weightGoalType: 'loss',
+      screenTimeLimitMins: 180,
+      todos: [],
+      longTermGoals: [],
+      foodLogs: [],
+      workouts: [],
+      screenTime: [],
+      travel: [],
+      customSections: [],
+      customLogs: {},
+      financials: {
+        chase: 2554.36,
+        etrade: 26266.45,
+        retirement: 89542.42,
+        investment: 19766.95
+      },
+      categories: [
+        { name: 'Rent / Cable', pct: 26.95 },
+        { name: 'Savings', pct: 46.91 },
+        { name: 'Travel', pct: 11.75 },
+        { name: 'Grocery / Needs', pct: 5.05 },
+        { name: 'Fun', pct: 4.45 },
+        { name: 'Car Expenses', pct: 3.26 }
+      ]
+    };
+
+    let weightChartInstance = null;
+
+    function loadState() {
+      const saved = localStorage.getItem('good_habits_state');
+      if (saved) {
+        try {
+          state = { ...state, ...JSON.parse(saved) };
+        } catch (e) {
+          console.error("Failed to parse state", e);
+        }
+      }
+      checkRecurringResets();
+      setupEventListeners();
+      initChart();
+      updateUI();
+    }
+
+    function saveState() {
+      localStorage.setItem('good_habits_state', JSON.stringify(state));
+      updateUI();
+    }
+
+    function checkRecurringResets() {
+      const now = Date.now();
+      const periods = {
+        daily: 24 * 60 * 60 * 1000,
+        weekly: 7 * 24 * 60 * 60 * 1000,
+        biweekly: 14 * 24 * 60 * 60 * 1000,
+        monthly: 30 * 24 * 60 * 60 * 1000
+      };
+
+      let stateChanged = false;
+      state.todos = state.todos.map(t => {
+        if (t.isRecurring && t.completed && t.completedAt) {
+          const elapsed = now - t.completedAt;
+          const targetPeriod = periods[t.recurrence] || periods.daily;
+          if (elapsed >= targetPeriod) {
+            stateChanged = true;
+            return { ...t, completed: false, completedAt: null };
+          }
+        }
+        return t;
+      });
+
+      if (stateChanged) saveState();
+    }
+
+    function triggerMascotPopup(title, message) {
+      document.getElementById('mascot-popup-title').textContent = title;
+      document.getElementById('mascot-popup-msg').textContent = message;
+      document.getElementById('mascot-popup').classList.remove('hidden');
+      
+      if (typeof confetti === 'function') {
+        confetti({ particleCount: 50, spread: 70, origin: { y: 0.6 } });
+      }
+    }
+
+    function awardXP(amount, reason = "Great Job!") {
+      state.xp += amount;
+      const nextLevelXP = state.level * 100;
+
+      if (state.xp >= nextLevelXP) {
+        state.xp -= nextLevelXP;
+        state.level += 1;
+        triggerMascotPopup("LEVEL UP! 🎉", `Pulse is so proud! You reached Level ${state.level}!`);
+      } else {
+        triggerMascotPopup(`+${amount} XP Earned! ❤️`, reason);
+      }
+      saveState();
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active', 'bg-indigo-50', 'text-indigo-600', 'font-bold');
+      });
+
+      const target = document.getElementById(tabId);
+      if (target) target.classList.add('active');
+
+      const activeBtn = document.getElementById(`btn-${tabId}`) || Array.from(document.querySelectorAll('.nav-btn')).find(b => b.textContent.toLowerCase().includes(tabId));
+      if (activeBtn) {
+        activeBtn.classList.add('active', 'bg-indigo-50', 'text-indigo-600', 'font-bold');
+      }
+    }
+
+    function setupEventListeners() {
+      document.getElementById('header-mascot-trigger').addEventListener('click', () => {
+        const quotes = [
+          "Pulse says: Every small habit counts towards a big future!",
+          "Keep going! You're crushing your daily goals!",
+          "Remember to hydrate and take quick stretch breaks today!"
+        ];
+        const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+        triggerMascotPopup("Pulse is Cheering For You!", randomQuote);
+      });
+
+      document.getElementById('btn-close-mascot').addEventListener('click', () => {
+        document.getElementById('mascot-popup').classList.add('hidden');
+      });
+
+      ['dashboard', 'todo', 'wellness', 'finance', 'food', 'exercise', 'screentime', 'travel'].forEach(tab => {
+        const btn = document.getElementById(`btn-${tab}`);
+        if (btn) btn.addEventListener('click', () => switchTab(tab));
+      });
+
+      document.getElementById('quick-todo').addEventListener('click', () => switchTab('todo'));
+      document.getElementById('quick-cal-xp').addEventListener('click', claimCalorieXP);
+      document.getElementById('quick-exercise').addEventListener('click', () => switchTab('exercise'));
+      document.getElementById('quick-finance').addEventListener('click', () => switchTab('finance'));
+
+      document.getElementById('btn-open-modal').addEventListener('click', () => document.getElementById('custom-modal').classList.remove('hidden'));
+      document.getElementById('btn-close-modal').addEventListener('click', () => document.getElementById('custom-modal').classList.add('hidden'));
+      document.getElementById('btn-export').addEventListener('click', exportData);
+
+      document.getElementById('form-todo').addEventListener('submit', addTodoTask);
+      document.getElementById('form-lt-goal').addEventListener('submit', addLongTermGoal);
+      document.getElementById('form-food').addEventListener('submit', addFoodLog);
+      document.getElementById('form-exercise').addEventListener('submit', addWorkout);
+      document.getElementById('form-screentime').addEventListener('submit', logScreenTime);
+      document.getElementById('form-travel').addEventListener('submit', addTravelGoal);
+      document.getElementById('form-income').addEventListener('submit', addIncome);
+      document.getElementById('form-expense').addEventListener('submit', addExpense);
+      document.getElementById('form-custom-sec').addEventListener('submit', createCustomSection);
+
+      document.getElementById('btn-edit-paycheck').addEventListener('click', updatePaycheckAmount);
+      document.getElementById('btn-edit-accounts').addEventListener('click', updateAccountBalances);
+      document.getElementById('btn-add-category').addEventListener('click', addBudgetCategory);
+      document.getElementById('btn-edit-macro-goals').addEventListener('click', updateMacroGoals);
+      document.getElementById('btn-claim-cal-xp').addEventListener('click', claimCalorieXP);
+
+      // Wellness Events
+      document.getElementById('btn-edit-water-goal').addEventListener('click', updateWaterGoal);
+      document.getElementById('btn-edit-sleep-goals').addEventListener('click', updateSleepGoals);
+      document.getElementById('form-sleep').addEventListener('submit', logSleep);
+
+      // Weight & Chart Events
+      document.getElementById('form-log-weight').addEventListener('submit', logWeight);
+      document.getElementById('btn-edit-st-limit').addEventListener('click', updateScreenTimeLimit);
+    }
+
+    // Wellness Logic (Water & Sleep Precision)
+    function addWater(oz) {
+      const prev = state.todayWater;
+      state.todayWater += oz;
+      if (prev < state.waterGoal && state.todayWater >= state.waterGoal) {
+        awardXP(15, "Hydration Goal Reached! Pulse loves water!");
+      } else {
+        saveState();
+      }
+    }
+
+    function addCustomWater() {
+      const oz = prompt("Enter Water Amount (oz):", "12");
+      if (oz && !isNaN(oz)) addWater(parseInt(oz));
+    }
+
+    function updateWaterGoal() {
+      const oz = prompt("Daily Hydration Target (oz):", state.waterGoal || 64);
+      if (oz && !isNaN(oz)) {
+        state.waterGoal = parseInt(oz);
+        saveState();
+      }
+    }
+
+    function updateSleepGoals() {
+      const bedtime = prompt("Bedtime Target Goal (HH:MM):", state.sleepGoals.bedtime);
+      const waketime = prompt("Wake Time Target Goal (HH:MM):", state.sleepGoals.waketime);
+      const duration = prompt("Target Sleep Hours (e.g. 8.0):", state.sleepGoals.duration);
+
+      if (bedtime && waketime && duration) {
+        state.sleepGoals = { bedtime, waketime, duration: parseFloat(duration) };
+        saveState();
+      }
+    }
+
+    function timeToMins(t) {
+      const [h, m] = t.split(':').map(Number);
+      return h * 60 + m;
+    }
+
+    function logSleep(e) {
+      e.preventDefault();
+      const bed = document.getElementById('sleep-bedtime').value;
+      const wake = document.getElementById('sleep-waketime').value;
+
+      let start = new Date(`1970-01-01T${bed}:00`);
+      let end = new Date(`1970-01-01T${wake}:00`);
+      if (end <= start) end.setDate(end.getDate() + 1);
+
+      const hours = ((end - start) / (1000 * 60 * 60)).toFixed(1);
+      const entry = { id: Date.now(), date: new Date().toLocaleDateString(), bed, wake, hours: parseFloat(hours) };
+      
+      state.sleepLogs.unshift(entry);
+
+      // Check Precision Alignment (within 15 mins of bedtime and wake goals)
+      const targetBedMins = timeToMins(state.sleepGoals.bedtime);
+      const targetWakeMins = timeToMins(state.sleepGoals.waketime);
+      const actualBedMins = timeToMins(bed);
+      const actualWakeMins = timeToMins(wake);
+
+      const bedMatch = Math.abs(actualBedMins - targetBedMins) <= 15;
+      const wakeMatch = Math.abs(actualWakeMins - targetWakeMins) <= 15;
+      const perfectSchedule = bedMatch && wakeMatch;
+
+      let totalXP = 0;
+      let msgParts = [];
+
+      if (parseFloat(hours) >= state.sleepGoals.duration) {
+        totalXP += 25;
+        msgParts.push("Target hours met (+25 XP)");
+      } else {
+        totalXP += 10;
+        msgParts.push("Sleep logged (+10 XP)");
+      }
+
+      if (perfectSchedule) {
+        totalXP += 20;
+        msgParts.push("Strict Schedule Precision Bonus (+20 XP)");
+      }
+
+      awardXP(totalXP, msgParts.join(" + "));
+      saveState();
+    }
+
+    // Screen Time Next-Day Reflection Logic
+    function updateScreenTimeLimit() {
+      const hours = prompt("Daily Screen Time Limit Target (Hours):", Math.floor(state.screenTimeLimitMins / 60));
+      if (hours && !isNaN(hours)) {
+        state.screenTimeLimitMins = parseInt(hours) * 60;
+        saveState();
+      }
+    }
+
+    function logScreenTime(e) {
+      e.preventDefault();
+      const h = parseInt(document.getElementById('st-hours').value) || 0;
+      const m = parseInt(document.getElementById('st-mins').value) || 0;
+      const category = document.getElementById('st-category').value;
+      const totalMins = (h * 60) + m;
+
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const dateStr = yesterday.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
+
+      state.screenTime.unshift({
+        id: Date.now(),
+        date: dateStr,
+        mins: totalMins,
+        category
+      });
+
+      document.getElementById('st-hours').value = '';
+      document.getElementById('st-mins').value = '';
+
+      let earnedXP = 10; // Base reflection XP
+      let msg = "Yesterday's screen time logged (+10 XP)";
+
+      if (totalMins <= state.screenTimeLimitMins) {
+        earnedXP += 20;
+        msg += " + Under Limit Bonus! (+20 XP)";
+      }
+
+      awardXP(earnedXP, msg);
+      saveState();
+    }
+
+    // Weight & Chart Logic
+    function logWeight(e) {
+      e.preventDefault();
+      const val = parseFloat(document.getElementById('weight-input').value);
+      const goalType = document.getElementById('weight-goal-type').value;
+      state.weightGoalType = goalType;
+
+      const dateStr = new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
+      const lastLog = state.weightLogs[state.weightLogs.length - 1];
+
+      state.weightLogs.push({ id: Date.now(), date: dateStr, weight: val });
+      document.getElementById('weight-input').value = '';
+
+      let progressBonus = false;
+      if (lastLog) {
+        if (goalType === 'loss' && val < lastLog.weight) progressBonus = true;
+        if (goalType === 'gain' && val > lastLog.weight) progressBonus = true;
+      }
+
+      if (progressBonus) {
+        awardXP(50, `Moving towards your weight goal! +30 Progress Bonus!`);
+      } else {
+        awardXP(20, "Daily weight logged!");
+      }
+      saveState();
+    }
+
+    function initChart() {
+      const ctx = document.getElementById('weightCalorieChart');
+      if (!ctx) return;
+
+      weightChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: [],
+          datasets: [
+            {
+              label: 'Daily Calories (kcal)',
+              data: [],
+              backgroundColor: 'rgba(99, 102, 241, 0.25)',
+              borderColor: 'rgba(99, 102, 241, 0.8)',
+              borderWidth: 2,
+              borderRadius: 8,
+              yAxisID: 'yCals'
+            },
+            {
+              label: 'Weight (lbs)',
+              data: [],
+              type: 'line',
+              borderColor: 'rgba(244, 63, 94, 1)',
+              backgroundColor: 'rgba(244, 63, 94, 0.1)',
+              borderWidth: 3,
+              tension: 0.3,
+              pointRadius: 4,
+              yAxisID: 'yWeight'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            yCals: {
+              type: 'linear',
+              position: 'left',
+              title: { display: true, text: 'Calories' },
+              grid: { display: false }
+            },
+            yWeight: {
+              type: 'linear',
+              position: 'right',
+              title: { display: true, text: 'Weight (lbs)' },
+              grid: { color: 'rgba(226, 232, 240, 0.6)' }
+            }
+          }
+        }
+      });
+    }
+
+    function updateChartData() {
+      if (!weightChartInstance) return;
+
+      const dates = [];
+      const now = new Date();
+      for (let i = 13; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(now.getDate() - i);
+        dates.push(d.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }));
+      }
+
+      const calData = dates.map(d => {
+        const match = state.foodLogs.find(f => new Date(f.id).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }) === d);
+        return match ? match.cals : 0;
+      });
+
+      const weightData = dates.map(d => {
+        const match = state.weightLogs.find(w => w.date === d);
+        return match ? match.weight : null;
+      });
+
+      weightChartInstance.data.labels = dates;
+      weightChartInstance.data.datasets[0].data = calData;
+      weightChartInstance.data.datasets[1].data = weightData;
+      weightChartInstance.update();
+    }
+
+    // Long Term Goals Logic
+    function addLongTermGoal(e) {
+      e.preventDefault();
+      const text = document.getElementById('lt-goal-text').value;
+      const category = document.getElementById('lt-goal-category').value;
+
+      state.longTermGoals.push({ id: Date.now(), text, category, completed: false });
+      document.getElementById('lt-goal-text').value = '';
+      saveState();
+    }
+
+    function toggleLTGoal(id) {
+      state.longTermGoals = state.longTermGoals.map(g => {
+        if (g.id === id) {
+          if (!g.completed) awardXP(1000, "MAJOR MILESTONE UNLOCKED! +1,000 XP!");
+          return { ...g, completed: !g.completed };
+        }
+        return g;
+      });
+      saveState();
+    }
+
+    function deleteLTGoal(id) {
+      state.longTermGoals = state.longTermGoals.filter(g => g.id !== id);
+      saveState();
+    }
+
+    // To-Do Logic
+    function addTodoTask(e) {
+      e.preventDefault();
+      const input = document.getElementById('todo-input');
+      const catVal = document.getElementById('todo-category').value.split('|');
+      const category = catVal[0];
+      const xp = parseInt(catVal[1]);
+      const isRecurring = document.getElementById('todo-is-recurring').checked;
+      const recurrence = document.getElementById('todo-recurrence').value;
+
+      state.todos.push({
+        id: Date.now(),
+        text: input.value,
+        category,
+        xp,
+        isRecurring,
+        recurrence,
+        completed: false,
+        completedAt: null
+      });
+
+      input.value = '';
+      document.getElementById('todo-is-recurring').checked = false;
+      saveState();
+    }
+
+    function toggleTodo(id) {
+      state.todos = state.todos.map(t => {
+        if (t.id === id) {
+          const nextCompleted = !t.completed;
+          if (nextCompleted) {
+            awardXP(t.xp || 10, `${t.category || 'Task'} completed! Pulse loves your productivity!`);
+          }
+          return {
+            ...t,
+            completed: nextCompleted,
+            completedAt: nextCompleted ? Date.now() : null
+          };
+        }
+        return t;
+      });
+      saveState();
+    }
+
+    function deleteTodo(id) {
+      state.todos = state.todos.filter(t => t.id !== id);
+      saveState();
+    }
+
+    // Food & Macro Logic
+    function addFoodLog(e) {
+      e.preventDefault();
+      const name = document.getElementById('food-name').value;
+      const cals = parseInt(document.getElementById('food-cals').value) || 0;
+      const p = parseInt(document.getElementById('food-protein').value) || 0;
+      const c = parseInt(document.getElementById('food-carbs').value) || 0;
+      const f = parseInt(document.getElementById('food-fat').value) || 0;
+
+      state.foodLogs.push({ id: Date.now(), name, cals, p, c, f });
+      document.getElementById('food-name').value = '';
+      document.getElementById('food-cals').value = '';
+      document.getElementById('food-protein').value = '0';
+      document.getElementById('food-carbs').value = '0';
+      document.getElementById('food-fat').value = '0';
+      saveState();
+    }
+
+    function updateMacroGoals() {
+      const cals = prompt("Daily Calorie Target (kcal):", state.macroGoals.cals);
+      const p = prompt("Daily Protein Target (g):", state.macroGoals.p);
+      const c = prompt("Daily Carbs Target (g):", state.macroGoals.c);
+      const f = prompt("Daily Fat Target (g):", state.macroGoals.f);
+
+      if (cals && p && c && f) {
+        state.macroGoals = { cals: parseInt(cals), p: parseInt(p), c: parseInt(c), f: parseInt(f) };
+        saveState();
+      }
+    }
+
+    function claimCalorieXP() {
+      const totalCals = state.foodLogs.reduce((sum, item) => sum + item.cals, 0);
+      if (totalCals <= state.macroGoals.cals && totalCals > 0) {
+        awardXP(25, "Awesome nutrition discipline staying under budget!");
+      } else {
+        alert("You have exceeded your calorie budget or haven't logged meals today.");
+      }
+    }
+
+    // Exercise Logic
+    function addWorkout(e) {
+      e.preventDefault();
+      const name = document.getElementById('ex-name').value;
+      const mins = parseInt(document.getElementById('ex-mins').value);
+      const cals = parseInt(document.getElementById('ex-cals').value);
+      
+      state.workouts.push({ id: Date.now(), name, mins, cals });
+      document.getElementById('ex-name').value = '';
+      document.getElementById('ex-mins').value = '';
+      document.getElementById('ex-cals').value = '';
+      
+      awardXP(25, "Workout logged! Pulse's heart is pumping!");
+      saveState();
+    }
+
+    // Finance Functions
+    function addIncome(e) {
+      e.preventDefault();
+      const amount = parseFloat(document.getElementById('inc-amount').value);
+      const cat = document.getElementById('inc-category').value;
+
+      if (cat === 'Retirement') {
+        state.financials.retirement += amount;
+        awardXP(50, "Investment deposit logged! Wealth building bonus!");
+      } else if (cat === 'Savings') {
+        state.financials.etrade += amount;
+        awardXP(50, "Savings deposit logged! Wealth building bonus!");
+      } else {
+        state.financials.chase += amount;
+      }
+
+      document.getElementById('inc-desc').value = '';
+      document.getElementById('inc-amount').value = '';
+      saveState();
+    }
+
+    function addExpense(e) {
+      e.preventDefault();
+      const amount = parseFloat(document.getElementById('exp-amount').value);
+      state.financials.chase -= amount;
+      document.getElementById('exp-desc').value = '';
+      document.getElementById('exp-amount').value = '';
+      saveState();
+    }
+
+    function updatePaycheckAmount() {
+      const val = prompt("Bi-weekly Paycheck Net Amount ($):", state.paycheck);
+      if (val && !isNaN(val)) {
+        state.paycheck = parseFloat(val);
+        saveState();
+      }
+    }
+
+    function updateAccountBalances() {
+      const chase = prompt("Chase Checking Balance ($):", state.financials.chase);
+      const etrade = prompt("E*Trade Savings Balance ($):", state.financials.etrade);
+      const ret = prompt("Retirement Balances ($):", state.financials.retirement);
+      const inv = prompt("Brokerage Balances ($):", state.financials.investment);
+
+      if (chase && etrade && ret && inv) {
+        state.financials = {
+          chase: parseFloat(chase),
+          etrade: parseFloat(etrade),
+          retirement: parseFloat(ret),
+          investment: parseFloat(inv)
+        };
+        saveState();
+      }
+    }
+
+    function addBudgetCategory() {
+      const name = prompt("New Category Name:");
+      const pct = prompt("Paycheck Allocation Percentage (%):");
+      if (name && pct && !isNaN(pct)) {
+        state.categories.push({ name, pct: parseFloat(pct) });
+        saveState();
+      }
+    }
+
+    function addTravelGoal(e) {
+      e.preventDefault();
+      const input = document.getElementById('travel-input');
+      state.travel.push({ id: Date.now(), text: input.value, done: false });
+      input.value = '';
+      saveState();
+    }
+
+    function toggleTravel(id) {
+      state.travel = state.travel.map(t => {
+        if (t.id === id) {
+          if (!t.done) awardXP(30, "Travel goal checked off! Wandering heart bonus!");
+          return { ...t, done: !t.done };
+        }
+        return t;
+      });
+      saveState();
+    }
+
+    // Custom Section Creation
+    function createCustomSection(e) {
+      e.preventDefault();
+      const title = document.getElementById('modal-sec-title').value;
+      const icon = document.getElementById('modal-sec-icon').value;
+      const id = 'custom_' + Date.now();
+
+      state.customSections.push({ id, title, icon });
+      state.customLogs[id] = [];
+      document.getElementById('custom-modal').classList.add('hidden');
+      saveState();
+      switchTab(id);
+    }
+
+    function addCustomLog(secId) {
+      const input = document.getElementById(`input_${secId}`);
+      if (!input || !input.value) return;
+      if (!state.customLogs[secId]) state.customLogs[secId] = [];
+
+      state.customLogs[secId].push({ id: Date.now(), text: input.value, date: new Date().toLocaleDateString() });
+      input.value = '';
+      awardXP(15, "Custom habit logged! Pulse is cheering!");
+      saveState();
+    }
+
+    // Render Function
+    function updateUI() {
+      // Level & XP
+      document.getElementById('user-level').textContent = state.level;
+      const maxXP = state.level * 100;
+      document.getElementById('user-xp').textContent = `${state.xp} / ${maxXP} XP`;
+      const pct = Math.min(100, Math.round((state.xp / maxXP) * 100));
+      document.getElementById('xp-bar').style.width = pct + '%';
+      document.getElementById('xp-percentage').textContent = pct + '% to Lvl UP';
+
+      // Current Weight Dashboard Card
+      const latestWeight = state.weightLogs.length > 0 ? state.weightLogs[state.weightLogs.length - 1].weight : null;
+      document.getElementById('dash-weight').textContent = latestWeight ? `${latestWeight} lbs` : '-- lbs';
+
+      // Water UI Render
+      const wPct = Math.min(100, Math.round((state.todayWater / state.waterGoal) * 100));
+      document.getElementById('water-fill').style.height = wPct + '%';
+      document.getElementById('water-fill-pct').textContent = wPct + '%';
+      document.getElementById('water-count-label').textContent = `${state.todayWater} / ${state.waterGoal} oz`;
+      document.getElementById('water-status-msg').textContent = wPct >= 100 ? "🎉 Daily hydration target crushed!" : "Keep drinking water today!";
+
+      // Sleep UI Render
+      document.getElementById('goal-bedtime-lbl').textContent = state.sleepGoals.bedtime;
+      document.getElementById('goal-waketime-lbl').textContent = state.sleepGoals.waketime;
+      document.getElementById('goal-sleep-hrs-lbl').textContent = `${state.sleepGoals.duration} hrs`;
+
+      document.getElementById('sleep-history-list').innerHTML = state.sleepLogs.map(s => `
+        <li class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+          <div>
+            <span class="font-bold text-slate-800">${s.date}</span>
+            <span class="text-slate-500 ml-2">(${s.bed} to ${s.wake})</span>
+          </div>
+          <span class="font-extrabold text-indigo-600">${s.hours} hrs slept</span>
+        </li>
+      `).join('');
+
+      // Screen Time Limit Label & History
+      const limitHrs = (state.screenTimeLimitMins / 60).toFixed(1);
+      document.getElementById('st-limit-lbl').textContent = `${limitHrs}h`;
+
+      document.getElementById('st-history').innerHTML = state.screenTime.map(st => `
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center text-xs">
+          <div>
+            <span class="font-bold text-slate-800">${st.date}</span>
+            <span class="ml-2 font-semibold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md">${st.category || 'General'}</span>
+          </div>
+          <span class="font-extrabold ${st.mins <= state.screenTimeLimitMins ? 'text-emerald-600' : 'text-amber-500'}">${Math.floor(st.mins / 60)}h ${st.mins % 60}m</span>
+        </div>
+      `).join('');
+
+      // Update Chart
+      updateChartData();
+
+      // Long Term Goals Dashboard Render
+      const dashLTList = document.getElementById('dash-lt-goals-list');
+      dashLTList.innerHTML = state.longTermGoals.map(g => `
+        <li class="flex items-center justify-between p-3.5 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 transition">
+          <div class="flex items-center gap-3">
+            <input type="checkbox" ${g.completed ? 'checked' : ''} onchange="toggleLTGoal(${g.id})" class="w-4 h-4 accent-rose-500 rounded cursor-pointer">
+            <span class="${g.completed ? 'line-through text-slate-400' : 'text-slate-800 font-bold'}">${g.text}</span>
+            <span class="text-[10px] bg-rose-50 text-rose-600 font-bold px-2 py-0.5 rounded-md border border-rose-200 capitalize">${g.category}</span>
+          </div>
+          <button onclick="deleteLTGoal(${g.id})" class="text-xs text-slate-400 hover:text-rose-500"><i class="fa-solid fa-trash"></i></button>
+        </li>
+      `).join('');
+
+      // Render Category Tab Long-Term Goals
+      ['exercise', 'food', 'wellness', 'finance', 'screentime', 'travel', 'todo'].forEach(cat => {
+        const container = document.getElementById(`${cat}-lt-container`);
+        if (!container) return;
+
+        const catGoals = state.longTermGoals.filter(g => g.category === cat);
+        if (catGoals.length > 0) {
+          container.classList.remove('hidden');
+          container.innerHTML = `
+            <div class="bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-200 p-4 rounded-2xl">
+              <h3 class="text-xs font-extrabold text-rose-600 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <i class="fa-solid fa-trophy text-amber-500"></i> Long-Term Goals (${cat})
+              </h3>
+              <div class="space-y-2">
+                ${catGoals.map(g => `
+                  <div class="flex items-center justify-between p-2.5 bg-white rounded-xl border border-rose-100 shadow-sm">
+                    <div class="flex items-center gap-2">
+                      <input type="checkbox" ${g.completed ? 'checked' : ''} onchange="toggleLTGoal(${g.id})" class="w-4 h-4 accent-rose-500 rounded cursor-pointer">
+                      <span class="${g.completed ? 'line-through text-slate-400' : 'text-slate-800 font-bold text-sm'}">${g.text}</span>
+                    </div>
+                    <span class="text-xs font-bold text-amber-500">+1,000 XP</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        } else {
+          container.classList.add('hidden');
+        }
+      });
+
+      // To-Do List Render
+      const todoList = document.getElementById('todo-list');
+      todoList.innerHTML = state.todos.map(t => `
+        <li class="flex items-center justify-between p-3.5 bg-slate-50 hover:bg-slate-100/80 rounded-xl border border-slate-200 transition">
+          <div class="flex items-center gap-3">
+            <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTodo(${t.id})" class="w-4 h-4 accent-indigo-600 rounded cursor-pointer">
+            <span class="${t.completed ? 'line-through text-slate-400' : 'text-slate-800 font-medium'}">${t.text}</span>
+            <span class="text-[10px] bg-indigo-50 text-indigo-600 font-bold px-2 py-0.5 rounded-md border border-indigo-200">${t.category || 'Task'} (+${t.xp || 10} XP)</span>
+            ${t.isRecurring ? `<span class="text-[10px] bg-purple-50 text-purple-600 font-bold px-2 py-0.5 rounded-md border border-purple-200 flex items-center gap-1"><i class="fa-solid fa-rotate text-[8px]"></i> ${t.recurrence}</span>` : ''}
+          </div>
+          <button onclick="deleteTodo(${t.id})" class="text-xs text-rose-500 hover:text-rose-700 p-1"><i class="fa-solid fa-trash"></i></button>
+        </li>
+      `).join('');
+      document.getElementById('todo-count').textContent = `${state.todos.filter(t => t.completed).length} Completed`;
+
+      // Food & Macros Render
+      const foodList = document.getElementById('food-list');
+      foodList.innerHTML = state.foodLogs.map(f => `
+        <li class="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+          <div>
+            <p class="text-slate-800 font-bold">${f.name}</p>
+            <p class="text-xs text-slate-500 font-medium">P: ${f.p || 0}g | C: ${f.c || 0}g | F: ${f.f || 0}g</p>
+          </div>
+          <span class="text-xs font-extrabold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg">${f.cals} kcal</span>
+        </li>
+      `).join('');
+
+      const totalCals = state.foodLogs.reduce((s, f) => s + f.cals, 0);
+      const totalP = state.foodLogs.reduce((s, f) => s + (f.p || 0), 0);
+      const totalC = state.foodLogs.reduce((s, f) => s + (f.c || 0), 0);
+      const totalF = state.foodLogs.reduce((s, f) => s + (f.f || 0), 0);
+
+      document.getElementById('dash-cals').textContent = `${totalCals} / ${state.macroGoals.cals} kcal`;
+      document.getElementById('cal-count-label').textContent = `${totalCals} / ${state.macroGoals.cals} kcal`;
+      document.getElementById('p-count-label').textContent = `${totalP} / ${state.macroGoals.p}g`;
+      document.getElementById('c-count-label').textContent = `${totalC} / ${state.macroGoals.c}g`;
+      document.getElementById('f-count-label').textContent = `${totalF} / ${state.macroGoals.f}g`;
+
+      document.getElementById('bar-cal').style.width = Math.min(100, (totalCals / state.macroGoals.cals) * 100) + '%';
+      document.getElementById('bar-p').style.width = Math.min(100, (totalP / state.macroGoals.p) * 100) + '%';
+      document.getElementById('bar-c').style.width = Math.min(100, (totalC / state.macroGoals.c) * 100) + '%';
+      document.getElementById('bar-f').style.width = Math.min(100, (totalF / state.macroGoals.f) * 100) + '%';
+
+      // Exercise
+      const exList = document.getElementById('workout-list');
+      exList.innerHTML = state.workouts.map(w => `
+        <li class="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+          <span class="text-slate-800 font-bold">${w.name} (${w.mins} mins)</span>
+          <span class="text-xs font-extrabold text-sky-600 bg-sky-50 border border-sky-200 px-2.5 py-1 rounded-lg">-${w.cals} kcal</span>
+        </li>
+      `).join('');
+      document.getElementById('dash-workout').textContent = `${state.workouts.reduce((s, w) => s + w.mins, 0)} mins`;
+
+      // Financials Render
+      const netWorth = state.financials.chase + state.financials.etrade + state.financials.retirement + state.financials.investment;
+      document.getElementById('fin-net-worth').textContent = '$' + netWorth.toLocaleString('en-US', { minimumFractionDigits: 2 });
+      document.getElementById('dash-networth').textContent = '$' + netWorth.toLocaleString('en-US', { minimumFractionDigits: 2 });
+      document.getElementById('fin-paycheck-amount').textContent = '$' + state.paycheck.toLocaleString('en-US', { minimumFractionDigits: 2 });
+
+      document.getElementById('account-balances-list').innerHTML = `
+        <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-200">
+          <span class="text-sm font-semibold text-slate-700">Chase Checking</span>
+          <span class="font-extrabold text-sky-600">$${state.financials.chase.toLocaleString()}</span>
+        </div>
+        <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-200">
+          <span class="text-sm font-semibold text-slate-700">E*Trade High-Yield Savings</span>
+          <span class="font-extrabold text-emerald-600">$${state.financials.etrade.toLocaleString()}</span>
+        </div>
+        <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-200">
+          <span class="text-sm font-semibold text-slate-700">Retirement Accounts</span>
+          <span class="font-extrabold text-purple-600">$${state.financials.retirement.toLocaleString()}</span>
+        </div>
+        <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-200">
+          <span class="text-sm font-semibold text-slate-700">Investment Brokerage</span>
+          <span class="font-extrabold text-indigo-600">$${state.financials.investment.toLocaleString()}</span>
+        </div>
+      `;
+
+      const p = state.paycheck;
+      document.getElementById('budget-buckets-list').innerHTML = state.categories.map(c => `
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center">
+          <div>
+            <p class="text-sm font-bold text-slate-800">${c.name} (${c.pct}%)</p>
+            <p class="text-xs text-slate-500 font-medium">$${((p * c.pct) / 100).toFixed(2)} per paycheck</p>
+          </div>
+          <span class="text-sm font-extrabold text-indigo-600">$${(((p * c.pct) / 100) * 2).toFixed(2)}/mo</span>
+        </div>
+      `).join('');
+
+      const expSelect = document.getElementById('exp-bucket');
+      expSelect.innerHTML = state.categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+
+      document.getElementById('travel-list').innerHTML = state.travel.map(t => `
+        <li class="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+          <div class="flex items-center gap-3">
+            <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTravel(${t.id})" class="w-4 h-4 accent-pink-500 rounded cursor-pointer">
+            <span class="${t.done ? 'line-through text-slate-400' : 'text-slate-800 font-medium'}">${t.text}</span>
+          </div>
+        </li>
+      `).join('');
+
+      renderCustomTabs();
+    }
+
+    function renderCustomTabs() {
+      const navContainer = document.getElementById('nav-tabs');
+      const contentContainer = document.getElementById('custom-sections-container');
+
+      document.querySelectorAll('.custom-nav-btn').forEach(b => b.remove());
+      contentContainer.innerHTML = '';
+
+      state.customSections.forEach(sec => {
+        const btn = document.createElement('button');
+        btn.className = `nav-btn custom-nav-btn flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition`;
+        btn.onclick = () => switchTab(sec.id);
+        btn.innerHTML = `<i class="fa-solid ${sec.icon}"></i> ${sec.title}`;
+        navContainer.appendChild(btn);
+
+        const logs = state.customLogs[sec.id] || [];
+        const sectionEl = document.createElement('section');
+        sectionEl.id = sec.id;
+        sectionEl.className = 'tab-content space-y-6';
+        sectionEl.innerHTML = `
+          <div class="bg-white border border-slate-200/80 p-6 rounded-2xl shadow-sm">
+            <h2 class="text-xl font-bold text-slate-900 mb-2 flex items-center gap-2">
+              <i class="fa-solid ${sec.icon} text-indigo-600"></i> ${sec.title}
+            </h2>
+            <p class="text-xs text-slate-500 font-medium mb-6">Log entries to earn <strong class="text-indigo-600">+15 XP</strong> each!</p>
+
+            <div class="flex gap-2 mb-6">
+              <input type="text" id="input_${sec.id}" placeholder="Log progress or notes..." class="flex-1 bg-slate-50 border border-slate-200 px-4 py-2.5 rounded-xl text-slate-800 focus:outline-none focus:border-indigo-500">
+              <button onclick="addCustomLog('${sec.id}')" class="bg-indigo-600 hover:bg-indigo-700 font-bold px-5 py-2.5 rounded-xl text-white transition shadow-sm">Log Entry</button>
+            </div>
+
+            <ul class="space-y-2">
+              ${logs.map(l => `
+                <li class="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                  <span class="text-slate-800 font-medium">${l.text}</span>
+                  <span class="text-xs text-slate-400 font-medium">${l.date}</span>
+                </li>
+              `).join('')}
+            </ul>
+          </div>
+        `;
+        contentContainer.appendChild(sectionEl);
+      });
+    }
+
+    function exportData() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `good_habits_backup_${new Date().toISOString().slice(0,10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    document.addEventListener('DOMContentLoaded', loadState);
+  </script>
+</body>
+</html>
